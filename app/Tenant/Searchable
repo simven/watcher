@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Tenant;
+
+/**
+ * Class Searchable
+ * @package App\Tenant
+ */
+trait Searchable
+{
+    /**
+     * @var int
+     */
+    protected $pagination = 30;
+
+    /**
+     * @param      $query
+     * @param $search
+     * @param bool $pagination
+     * @return mixed
+     */
+    public function scopeSearch($query, $search, $pagination = false)
+    {
+        if (is_integer($pagination)) {
+            $this->pagination = $pagination;
+        }
+
+        return $this->searchInAvailableProperty($search)->orderBy($this->getKeyName(), 'desc')->paginate($pagination);
+
+    }
+}

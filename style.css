@@ -1,0 +1,253 @@
+/* Ici, votre style sera écrit */
+@font-face {
+    font-family: "coolvetica";
+    src: url("../coolvetica/coolvetica_rg-webfont.");
+    font-weight: normal;
+    font-style: normal;
+}
+
+
+header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-left: 5% ;
+    margin-right: 5%;
+    margin-top: 2%;
+}
+*{
+    font-family: "coolvetica", sans-serif;
+
+}
+.container{
+    max-width: 1400px;
+    margin: 0 auto;
+}
+.logo{
+    background-image: url("../img/graphismes/LogoWatcher'sfini.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 150px;
+    width: 150px;
+
+}
+
+.navigation {
+    display: flex;
+    flex-grow: 1;
+    justify-content: flex-end;
+}
+
+.navigation a{
+    text-decoration: none;
+    color: #3D3D3D;
+    padding:20px;
+    font-size: 20px;
+}
+
+.liens a:hover {
+    color: white;
+    background-color: #f4c430;
+    border-radius: 30px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+
+}
+
+.liens a{
+    margin-top: 22px;
+    text-decoration: none;
+    color: #3d3d3d;
+}
+
+.liste-serie {
+    display: flex;
+    flex-wrap: wrap;
+}
+.liste-serie ul{
+    list-style-type: none;
+}
+.liste-serie a{
+    text-decoration: none;
+    color: #3D3D3D;
+}
+.donnees{
+    align-items: center;
+}
+.banniere img{
+    width: 100%;
+    height: 600px;
+}
+.infos{
+    background-color: #3D3D3D;
+    color: white;
+    padding: 2%;
+}
+.avis{
+    color: #3D3D3D;
+    padding: 2%;
+    display: flex;
+    width: 50%;
+    flex-direction: column;
+}
+.commentaire {
+    background-color: gray;
+    list-style-type:none;
+    margin: 10px;
+    padding: 2%;
+    border-radius: 30px;
+    color: white;
+    text-align: center;
+}
+.espacesaison{
+    color: #3D3D3D;
+    padding: 2%;
+    display: flex;
+    width: 50%;
+    flex-direction: column;
+}
+.avisetsaisons{
+    display: flex;
+}
+
+
+.initFerme {
+    display: none;
+}
+
+.open {
+    display : block;
+}
+
+
+
+
+.gridmn {
+    display : grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 20px;
+
+
+
+}
+.gridmn div:nth-child(1) {
+    grid-column : 1 / 3;
+}
+
+.gridmn div:nth-child(1) img {
+    width : 100%;
+
+}
+
+.gridmn img {
+    width:100%;}
+
+.card-body {
+    background-color: #f4c430;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+    color: #3d3d3d;
+    border-radius: 30px;
+    width: 50%;
+}
+
+#recherche {
+    border-radius: 30px;
+}
+
+#btn_recherche{
+    border-radius: 30px;
+    background-color: #f4c430;
+    color: white;
+}
+
+.series_accueil:hover {
+    opacity: 0.7;
+}
+
+#buttonSaison button  {
+  color: white;
+    background-color: #f4c430;
+    border-radius: 10px;
+}
+
+#buttonSaison :hover {
+    color: white;
+    background-color: #3d3d3d;
+    border-radius: 10px;
+}
+
+#liste_comm {
+    border-radius: 10px;
+    color: #3d3d3d;
+    background-color: white;
+    padding: 3px;
+    border: 1px solid #3D3D3D;
+}
+
+#form_tri {
+    margin-top: 10px;
+}
+
+#btn_comm {
+    border-radius: 30px;
+    color: #3d3d3d;
+    background-color: white;
+    padding: 3px;
+    border: 1px solid #3D3D3D;
+}
+
+#btn_comm:hover{
+    border-radius: 30px;
+    color: white;
+    background-color: #3d3d3d;
+    padding: 3px;
+    border: 1px solid #3D3D3D;
+}
+
+.infos {
+    text-align: justify;
+    display: flex;
+    justify-content: space-between;
+
+
+}
+.resume {
+    flex-grow: 2;
+}
+.genres {
+    text-align: center;
+
+}
+
+.genres ul {
+    list-style-type: none;
+}
+
+
+
+
+.voirepisode a {
+    text-decoration: none;
+    color: #3D3D3D;
+    border: 1px solid gray;
+    padding: 2px;
+    text-align: center;
+    margin-top: 3px;
+}
+
+.resume {
+    width: 50%;
+}
+
+#email {
+    border-radius: 30px;
+    margin: 20px;
+}
+
+#password {
+    border-radius: 30px;
+    margin: 20px;
+}
+

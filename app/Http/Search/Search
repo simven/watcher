@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Search;
+
+use App\Serie;
+
+/**
+ * Class Search.
+ */
+class Search
+{
+    protected $serie;
+
+    /**
+     * Search constructor.
+     *
+     * @param Serie $address
+     */
+    public function __construct(Serie $serie)
+    {
+        $this->serie = serie;
+    }
+
+    /**
+     * @param      $query
+     *
+     * @return mixed
+     */
+    public function series($query)
+    {
+        return $this->serie->search($query);
+    }
+}
