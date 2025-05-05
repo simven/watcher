@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Resources\SerieResource;
-use App\Serie;
+use App\Models\Serie;
 use Illuminate\Http\Request;
 
 /*

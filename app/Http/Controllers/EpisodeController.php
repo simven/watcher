@@ -2,97 +2,68 @@
 
 namespace App\Http\Controllers;
 
-use App\Episode;
-use App\Serie;
+use App\Models\Episode;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class EpisodeController extends Controller
 {
     /**
      * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(): View
     {
-        //$episodes = Episode::all();
-        //return view('episode.index',['episodes'=>$episodes]);
+        $episodes = Episode::all();
+        return view('episode.index',['episodes'=>$episodes]);
     }
 
     /**
      * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(): View
     {
-        //
         return view('episodes.create');
     }
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        // your turn Simon Belmont
+        return redirect()->route('episodes.index');
     }
 
     /**
      * Display the specified resource.
-     *
-     * @param Request $request
-     * @param int $id
-     * @return \Illuminate\Http\Response
      */
-    public function show(Request $request, $id)
+    public function show(Episode $episode): View
     {
-        $action=$request->query('action','show');
-        $episode = Episode::find($id);
-
-        return view('episodes.show',['episode'=>$episode, 'action'=>$action]);
+        return view('episodes.show', ['episode' => $episode]);
     }
 
     /**
      * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Episode $episode): View
     {
-        $episode=Episode::find($id);
-        return view('episodes.edit',['episode'=>$episode]);
+        return view('episodes.edit', ['episode' => $episode]);
     }
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Episode $episode)
     {
-        // your turn Simon Belmont
+        //
     }
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param Request $request
-     * @param int $id
-     * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request, $id)
+    public function destroy(Episode $episode)
     {
-        if ($request->delete == 'valide') {
-            $episode = Episode::find($id);
-            $episode->delete();
-        }
-        return redirect()->route('episodes.index');
+        $episode->delete();
+        return redirect()->route('episodes.index')->with('success', 'Episode deleted successfully.');
     }
 }

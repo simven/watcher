@@ -1,7 +1,7 @@
 <header>
-    <a href="{{route('accueil')}}">
-        <div class="logo">
-        </div>
+    <a href="{{route('home')}}">
+        {{-- display logo in public/img/graphismes/logoWatcher.png  --}}
+        <img src="{{ asset('img/graphismes/logoWatcher.png') }}" alt="Logo" class="logo" width="150" height="150">
     </a>
     <div class="navigation">
         <a>
@@ -13,7 +13,7 @@
         </a>
     </div>
     <div class="liens">
-        <a href="{{ route('accueil') }}">ACCUEIL</a>
+        <a href="{{ route('home') }}">ACCUEIL</a>
         <a href="{{ route('series.index') }}">SERIES</a>
         @if(Auth::user())
             <a href="{{ route('users.show',Auth::user()->id) }}">MON COMPTE</a>

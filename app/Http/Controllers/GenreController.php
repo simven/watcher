@@ -2,118 +2,81 @@
 
 namespace App\Http\Controllers;
 
-use App\Genre;
-use App\Serie;
+use App\Models\Genre;
+use App\Models\Serie;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class GenreController extends Controller
 {
     /**
      * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(): View
     {
         $genres = Genre::all();
-        return view('genre.index',['genres'=>$genres]);
+        return view('genre.index', ['genres' => $genres]);
     }
 
     /**
      * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
      */
-    public function create($ids)
+    public function create(): View
     {
-        $serie = Serie::find($ids);
-        return view('genre.create', $serie->ids);
+        return view('genre.create');
     }
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validatedData = $request->validate([
             'nom' => ['required', 'max:50'],
-
         ]);
 
-        $input = $request->only(['nom']);
+        $genre = Genre::create($validatedData);
 
-        $genres = new Genre();
-
-        $genres->nom = $input['nom'];
-
-        $genres->save();
-
-        return redirect('/genre');
+        return redirect()->route('genre.index');
     }
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function show(Request $request, $id)
+    public function show(Genre $genre): View
     {
-        //
+        return view('genre.show', ['genre' => $genre]);
     }
 
     /**
      * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Genre $genre): View
     {
-        $genre = Genre::find($id);
-        return view('genre.edit', $genre->id);
+        return view('genre.edit', $genre);
     }
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Genre $genre): RedirectResponse
     {
         $validatedData = $request->validate([
             'nom' => ['required', 'max:50'],
-
         ]);
 
-        $input = $request->only(['nom']);
+        $genre->update($validatedData);
 
-        $genres = new Genre();
-
-        $genres->nom = $input['nom'];
-
-        $genres->save();
-
-        return redirect('/genre');
+        return redirect()->route('genre.show', $genre);
     }
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request, $id)
+    public function destroy(Genre $genre): RedirectResponse
     {
-        if ($request->delete == 'valide') {
-            $genres = Genre::find($id);
-            $genres->delete();
-        }
-        return redirect()->route('series.show');
+        $genre->delete();
+        return redirect()->route('genre.index')->with('success', 'Genre deleted successfully.');
     }
 }

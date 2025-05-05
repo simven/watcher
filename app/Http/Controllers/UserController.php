@@ -2,18 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Episode;
-use App\User;
-use App\Comment;
-use App\Serie;
+use App\Models\Comment;
+use App\Models\Episode;
+use App\Models\Serie;
+use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\View\View;
 
 class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
      */
     public function index()
     {
@@ -22,10 +23,8 @@ class UserController extends Controller
 
     /**
      * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(): View
     {
         return view('auth.register');
     }
@@ -33,10 +32,9 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param Request $request
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validatedData = $request->validate([
             'name' => ['required', 'max:100'],
@@ -62,7 +60,6 @@ class UserController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
     public function show(Request $request, $id)
     {
@@ -74,6 +71,7 @@ class UserController extends Controller
         $commentairesUser = Comment::where('user_id',$id)->get();
         $seriesCommentees = Serie::where('user_id',$id)->join('comments','series.id','=','comments.serie_id')->get();
         $seriesVisionnees = Serie::where('user_id',$id)->distinct('series.name')->join('episodes','series.id','=','episodes.serie_id')->join('seen','episodes.id','=','seen.episode_id')->get('series.nom');
+
         return view('users.show',[
             'user'=>$user,
             'nbEpisodesVus'=>$nbEpisodesVus,
@@ -90,7 +88,6 @@ class UserController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
     public function edit($id)
     {
@@ -101,13 +98,11 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @param int $id
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
-
         $validatedData = $request->validate([
             'name' => ['required', 'max:50'],
             'email' => ['required', 'max:50'],
@@ -132,7 +127,7 @@ class UserController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function destroy(Request $request, $id)
     {

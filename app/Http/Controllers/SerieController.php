@@ -2,211 +2,163 @@
 
 namespace App\Http\Controllers;
 
-use App\Comment;
-use App\Episode;
-use App\Genre;
-use App\User;
-use App\Serie;
+use App\Models\Genre;
+use App\Models\Serie;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\View\View;
 
 class SerieController extends Controller
 {
     /**
      * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request): View
     {
-        $idGre = $request->query('gre',-1);
-
-        if($idGre > 0){
-            $genre = Genre::find($idGre);
-            $series = $genre->series;
-        } else{
-            $series = Serie::all();
-        }
-
+        $idGre = $request->query('gre', -1);
+        $series = $idGre > 0 ? Genre::findOrFail($idGre)->series : Serie::all();
         $genres = Genre::all();
 
-
-        return view('series.index',['series'=>$series, 'idGre' => $idGre, 'genres' => $genres]);
+        return view('series.index', [
+            'series' => $series,
+            'idGre' => $idGre,
+            'genres' => $genres,
+        ]);
     }
 
     /**
      * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(): View
     {
         return view('series.create');
     }
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validatedData = $request->validate([
             'nom' => ['required', 'max:40'],
-            'resume' => ['required', 'max:4'],
-            'langue' => ['required', 'max:2'],
+            'resume' => ['required', 'max:255'],
+            'langue' => ['required', 'max:10'],
             'note' => ['required', 'max:5'],
             'statut' => ['required', 'max:30'],
-            'premiere' => ['required','max:15'],
-            'urlImage' => ['required','max:50'],
-            'avis' => ['max:500'],
+            'premiere' => ['required', 'max:15'],
+            'urlImage' => ['required', 'max:255'],
+            'avis' => ['nullable', 'max:500'],
         ]);
 
-        $input = $request->only(['nom','resume','langue','note','statut','premiere','urlImage']);
+        $serie = Serie::create($validatedData);
 
-        $series = new Serie();
-
-        $series->nom = $input['nom'];
-        $series->resume = $input['resume'];
-        $series->langue = $input['longue'];
-        $series->note = $input['note'];
-        $series->statut = $input['statut'];
-        $series->premiere = $input['premiere'];
-        $series->urlImage = $input['urlImage'];
-
-        $series->save();
-
-        return redirect('/series');
+        return redirect()->route('series.index');
     }
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function show(Request $request, $id)
+    public function show(Request $request, int $serie): View
     {
-        $saisons = Episode::where('serie_id',$id)->distinct('saison')->pluck('saison');
+        $serie = Serie::findOrFail($serie);
+        $saisons = $serie->episodes()->distinct()->pluck('saison');
+        $filtreCom = $request->query('filtreCom', 'none');
 
-        $action=$request->query('action','show');
-        $serie = Serie::find($id);
-        $filtreCom = $request->query('filtreCom','none');
-        if($filtreCom!='none') {
-            if ($filtreCom == 'croissant')
-                $comments = Comment::where('serie_id', $id)->orderBy('note', 'asc')->get();
-            elseif ($filtreCom == 'decroissant')
-                $comments = Comment::where('serie_id', $id)->orderBy('note', 'desc')->get();
-        }
-        else
-            $comments = Comment::where('serie_id',$id)->get();
+        $action = $request->query('action','show');
 
-        $genres =  Genre::where('genre_serie.serie_id',$id)->join('genre_serie','genres.id','=','genre_serie.genre_id')->get();
-        $episodes = Episode::where('serie_id',$id)->get();
-        $nbAvis = Comment::where('comments.serie_id',$id)->where('comments.validated',1)->count();
-        $sommeComValides = Comment::where('comments.serie_id',$id)->where('comments.validated',1)->sum('comments.note');
-        if($nbAvis==0||$sommeComValides==0)
-            $moyenne=0;
-        else
-            $moyenne = $sommeComValides/$nbAvis;
-        $dureeSerie = Serie::find($id)->episodes()->sum('duree');
-        $nbEpisodes = Serie::find($id)->episodes()->count();
+        $comments = match ($filtreCom) {
+            'croissant' => $serie->comments()->orderBy('note', 'asc')->get(),
+            'decroissant' => $serie->comments()->orderBy('note', 'desc')->get(),
+            default => $serie->comments,
+        };
 
-        return view('series.show',[
-            'serie'=>$serie,
-            'action'=>$action,
-            'comments'=>$comments,
-            'genres'=>$genres,
-            'episodes'=>$episodes,
-            'saisons' => $saisons,
-            'filtreCom'=>$filtreCom,
-            'nbAvis'=>$nbAvis,
-            'moyenne'=>$moyenne,
-            'dureeSerie'=>$dureeSerie,
-            'nbEpisodes'=>$nbEpisodes
-        ]);
+        $genres = $serie->genres;
+        $episodes = $serie->episodes;
+        $nbAvis = $serie->comments()->where('validated', 1)->count();
+        $sommeComValides = $serie->comments()->where('validated', 1)->sum('note');
+        $moyenne = $nbAvis > 0 ? $sommeComValides / $nbAvis : 0;
+        $dureeSerie = $serie->episodes()->sum('duree');
+        $nbEpisodes = $serie->episodes()->count();
+
+        return view('series.show', compact(
+            'serie',
+            'saisons',
+            'action',
+            'comments',
+            'genres',
+            'episodes',
+            'nbAvis',
+            'moyenne',
+            'dureeSerie',
+            'nbEpisodes',
+            'action',
+            'filtreCom'
+        ));
     }
 
     /**
      * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Serie $serie): View
     {
-        $serie = Serie::find($id);
-        return view('series.edit',['serie'=>$serie]);
+        return view('series.edit', compact('serie'));
     }
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id
-     * @return \Illuminate\Http\Response
-     * @throws \Illuminate\Validation\ValidationException
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Serie $serie): RedirectResponse
     {
         $validatedData = $request->validate([
             'nom' => ['max:40'],
-            'resume' => ['max:4'],
-            'langue' => ['max:2'],
+            'resume' => ['max:255'],
+            'langue' => ['max:10'],
             'note' => ['max:5'],
             'statut' => ['max:30'],
             'premiere' => ['max:15'],
-            'urlImage' => ['max:50'],
-            'avis' => ['required','max:500'],
-            'urlAvis'=>['max:500']
+            'urlImage' => ['max:255'],
+            'avis' => ['required', 'max:500'],
+            'urlAvis' => ['max:500'],
         ]);
 
-        $input = $request->only(['avis']);
+        $serie->update($validatedData);
 
-        $serie = Serie::find($id);
-
-        $serie->avis= $input['avis'];
-
-        $serie->save();
-
-        return redirect('/series/'.$id);
+        return redirect()->route('series.show', $serie);
     }
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request, $id)
+    public function destroy(Serie $serie): RedirectResponse
     {
-        if ($request->delete == 'valide') {
-            $serie = Serie::find($id);
-            $serie->delete();
-        }
+        $serie->delete();
+
         return redirect()->route('series.index');
     }
 
-
-    public function vuEpisode($id) {
+    public function vuEpisode(int $id): RedirectResponse
+    {
         Auth::user()->seen()->attach($id);
-
         return back();
     }
 
-
-    public function vuSerie($id) {
-        Auth::user()->seen()->attach(Serie::find($id)->episodes()->pluck('id')->toArray());
-
+    public function vuSerie(int $id): RedirectResponse
+    {
+        $episodeIds = Serie::findOrFail($id)->episodes()->pluck('id')->toArray();
+        Auth::user()->seen()->attach($episodeIds);
         return back();
     }
 
+    public function vuSaison(int $id, int $num): RedirectResponse
+    {
+        $episodeIds = Serie::findOrFail($id)
+            ->episodes()
+            ->where('saison', $num)
+            ->pluck('id')
+            ->toArray();
 
-    public function vuSaison($id, $num) {
-        Auth::user()->seen()->attach(Serie::find($id)->episodes()->where('saison',$num)->pluck('id')->toArray());
-
+        Auth::user()->seen()->attach($episodeIds);
         return back();
     }
 }

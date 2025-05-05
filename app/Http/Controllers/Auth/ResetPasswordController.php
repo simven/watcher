@@ -3,37 +3,58 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Foundation\Auth\ResetsPasswords;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+use Illuminate\View\View;
 
 class ResetPasswordController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Password Reset Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller is responsible for handling password reset requests
-    | and uses a simple trait to include this behavior. You're free to
-    | explore this trait and override any methods you wish to tweak.
-    |
-    */
-
-    use ResetsPasswords;
+    /**
+     * Redirection après reset.
+     */
+    protected string $redirectTo = '/';
 
     /**
-     * Where to redirect users after resetting their password.
-     *
-     * @var string
+     * Affiche le formulaire de reset avec token.
      */
-    protected $redirectTo = '/';
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
+    public function showResetForm(Request $request, string $token = null): View
     {
-        $this->middleware('guest');
+        return view('auth.passwords.reset', [
+            'token' => $token,
+            'email' => $request->email,
+        ]);
+    }
+
+    /**
+     * Gère la soumission du formulaire de reset.
+     */
+    public function reset(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'token'    => ['required'],
+            'email'    => ['required', 'email'],
+            'password' => ['required', 'confirmed', 'min:8'],
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function (User $user, string $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password),
+                    'remember_token' => Str::random(60),
+                ])->save();
+
+                Auth::login($user);
+            }
+        );
+
+        return $status === Password::PASSWORD_RESET
+            ? redirect($this->redirectTo)->with('status', __($status))
+            : back()->withErrors(['email' => __($status)]);
     }
 }

@@ -2,19 +2,19 @@
 
 namespace App\Http\Resources;
 
-use App\Genre;
+use App\Models\Genre;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-//use Illuminate\Http\Resources\JsonResource;
-use Illuminate\Support\Facades\Log;
 
 class SerieResource extends JsonResource {
     /**
      * Transform the resource collection into an array.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      * @return array
      */
-    public function toArray($request) {
+    public function toArray(Request $request): array
+    {
         //Log::info($this);
         $genres = Genre::where('serie_id', $this->id)->pluck('nom');
         return [
